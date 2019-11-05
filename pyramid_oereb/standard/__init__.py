@@ -30,8 +30,8 @@ def _create_standard_configuration_models_py_(code, geometry_type, absolute_path
     Args:
         code (str): The unique Code for the new model (see oereb specification for more details)
         geometry_type (str): A valid geometry type.
-        absolute_path (str): The absolute Path where the genderated python file will be placed. It
-            must bewriteable by the user running this command.
+        absolute_path (str): The absolute Path where the generated python file will be placed. It
+            must be writeable by the user running this command.
         schema (str): The schema name. If not specified, "name" will be used.
         primary_key_is_string (bool): The type of the primary key. You can use this to switch between STRING
             type or INTEGER type. Standard is to INTEGER => False
