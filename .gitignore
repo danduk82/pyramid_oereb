@@ -40,3 +40,4 @@ __pycache__/
 /docker/config.yaml
 .pytest_cache
 .idea
+*.swp
