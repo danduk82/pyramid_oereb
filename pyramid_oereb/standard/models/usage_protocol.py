@@ -29,7 +29,8 @@ class HttpLogs(Base):
         flavour (str): one of [reduced, full, signed, embeddable], where
             applicable (this field can be NULL)
     """
-    __tablename__ = 'usage_protocol'
+    __table_args__ = {'schema': 'server_internal_metrics'}
+    __tablename__ = 'http_logs'
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     service_type = sa.Column(sa.String, 
                              CheckConstraint("in ('GetEGRID',
