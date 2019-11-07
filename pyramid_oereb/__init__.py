@@ -78,7 +78,6 @@ def includeme(config):
 
     config.include('pyramid_oereb.routes')
 
-}
 def pyramid_oereb_processor(request):
     global processor
     if processor is None:
