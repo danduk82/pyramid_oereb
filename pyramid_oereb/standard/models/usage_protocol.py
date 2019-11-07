@@ -5,6 +5,7 @@ This is the bucket table used to store http access logs behaviors
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy_utils import JSONType
+from sqlalchemy import CheckConstraint
 
 from pyramid_oereb.standard.models import NAMING_CONVENTION
 from pyramid_oereb.lib.config import Config
@@ -33,13 +34,10 @@ class HttpLogs(Base):
     __tablename__ = 'http_logs'
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     service_type = sa.Column(sa.String, 
-                             CheckConstraint("in ('GetEGRID',
-                                                        'GetExtractById',
-                                                        'GetCapabilities',
-                                                        'GetVersion's)"), 
+                             CheckConstraint("in ('GetEGRID','GetExtractById','GetCapabilities', 'GetVersion's)"), 
                              nullable=False)
     format = sa.Column(sa.String, 
-                       CheckConstraint("in ('xml','json','pdf')",
+                       CheckConstraint("in ('xml','json','pdf')"),
                        nullable=False)
     #TODO: check if this should be optional
     location_requested = sa.Column(sa.String, nullable=False)

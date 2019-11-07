@@ -41,5 +41,6 @@ $($VENV_BIN/$MODEL_SCRIPT -c GroundwaterProtectionSites -g POLYGON -p $MODEL_PAT
 $($VENV_BIN/$MODEL_SCRIPT -c NoiseSensitivityLevels -g POLYGON -p $MODEL_PATH -k $MODEL_PK_TYPE_IS_STRING)
 $($VENV_BIN/$MODEL_SCRIPT -c ForestPerimeters -g LINESTRING -p $MODEL_PATH -k $MODEL_PK_TYPE_IS_STRING)
 $($VENV_BIN/$MODEL_SCRIPT -c ForestDistanceLines -g LINESTRING -p $MODEL_PATH -k $MODEL_PK_TYPE_IS_STRING)
+$($VENV_BIN/$MODEL_SCRIPT -c usage_protocol -g LINESTRING -p $MODEL_PATH -k $MODEL_PK_TYPE_IS_STRING)
 
 echo "models using '$MODEL_SCRIPT' created in $MODEL_PATH"
