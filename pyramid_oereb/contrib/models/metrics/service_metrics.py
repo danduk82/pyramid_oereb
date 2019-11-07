@@ -30,18 +30,18 @@ class HttpLogs(Base):
         flavour (str): one of [reduced, full, signed, embeddable], where
             applicable (this field can be NULL)
     """
-    __table_args__ = {'schema': 'server_internal_metrics'}
+    __table_args__ = {'schema': 'server_metrics'}
     __tablename__ = 'http_logs'
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+    date = sa.Column(sa.DateTime, nullable=False)
     service_type = sa.Column(sa.String, 
                              CheckConstraint("in ('GetEGRID','GetExtractById','GetCapabilities', 'GetVersion's)"), 
-                             nullable=False)
+                             nullable=True)
     format = sa.Column(sa.String, 
                        CheckConstraint("in ('xml','json','pdf')"),
-                       nullable=False)
-    #TODO: check if this should be optional
-    location_requested = sa.Column(sa.String, nullable=False)
+                       nullable=True)
+    location_requested = sa.Column(sa.String, nullable=True)
     http_status = sa.Column(sa.Integer, nullable=False)
-    flavour = sa.Column(sa.String, nullable=True)
+    flavour = sa.Column(sa.String, nullable=True1)
 
 
