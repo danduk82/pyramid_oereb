@@ -12,7 +12,7 @@ from pyramid_oereb.lib.config import Config
 
 metadata = sa.MetaData(naming_convention=NAMING_CONVENTION)
 Base = declarative_base()
-app_schema_name = Config.get('app_schema').get('name')
+metrics_schema_name = Config.get('metrics_schema').get('name')
 
 
 class HttpLogs(Base):
@@ -30,7 +30,7 @@ class HttpLogs(Base):
         flavour (str): one of [reduced, full, signed, embeddable], where
             applicable (this field can be NULL)
     """
-    __table_args__ = {'schema': 'server_metrics'}
+    __table_args__ = {'schema': metrics_schema_name}
     __tablename__ = 'http_logs'
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     date = sa.Column(sa.DateTime, nullable=False)
