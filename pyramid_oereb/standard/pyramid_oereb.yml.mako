@@ -1048,11 +1048,9 @@ pyramid_oereb:
 # this section is used to monitor the pyramid_oereb server and will 
 # create logs in a dedicated table/database.
 pyramid_oereb_server_logic:
-  logger: ${SERVICE_LOGGER_CLASS}
-  app_schema:
-    name: pyramid_oereb_main
-    models: pyramid_oereb.contrib.models.metrics.service_metrics
-    db_connection: &service_db_connection
-      ${service_logger_sqlalchemy_url}
-    db_database: server_logic
+  loggers:
+    metrics:
+      models: pyramid_oereb.contrib.models.metrics.service_metrics
+      db_connection: &service_db_connection
+        ${service_logger_sqlalchemy_url}
 
