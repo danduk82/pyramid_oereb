@@ -1051,5 +1051,7 @@ pyramid_oereb_server_logic:
   loggers:
     metrics:
       models: pyramid_oereb.contrib.models.metrics.service_metrics
+      schema:
+              name: service_metrics
       db_connection: &service_db_connection
         ${service_logger_sqlalchemy_url}

@@ -11,7 +11,7 @@ from pyramid_oereb.lib.config import Config
 
 metadata = sa.MetaData(naming_convention=NAMING_CONVENTION)
 Base = declarative_base()
-metrics_schema_name = Config.get('metrics_schema').get('name')
+metrics_schema_name = Config.get('loggers').get('metrics').get('schema').get('name')
 
 
 class HttpLogs(Base):
@@ -35,11 +35,12 @@ class HttpLogs(Base):
     date = sa.Column(sa.DateTime, nullable=False)
     service_type = sa.Column(sa.String,
                              CheckConstraint(
-                                  "in ('GetEGRID','GetExtractById','GetCapabilities', 'GetVersion')"
+                                  """service_type in
+                                  ('GetEGRID','GetExtractById','GetCapabilities','GetVersion')"""
                              ),
                              nullable=True)
     format = sa.Column(sa.String,
-                       CheckConstraint("in ('xml','json','pdf')"),
+                       CheckConstraint("format in ('xml','json','pdf')"),
                        nullable=True)
     location_requested = sa.Column(sa.String, nullable=True)
     http_status = sa.Column(sa.Integer, nullable=False)
