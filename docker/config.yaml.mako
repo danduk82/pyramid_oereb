@@ -1056,7 +1056,7 @@ environment:
 - pyramid_oereb.plrs.[].source.params.db_connection
 
 
-# pyramid_oerev_server_logic
+# pyramid_oereb_server_logic
 # this section is used to monitor the pyramid_oereb server and will
 # create logs in a dedicated table/database.
 pyramid_oereb_server_logic:
