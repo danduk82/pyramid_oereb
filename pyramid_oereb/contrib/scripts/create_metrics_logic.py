@@ -26,12 +26,13 @@ def _create_metrics_tables(configuration_yaml_path, section='pyramid_oereb_serve
     if not isinstance(loggers, dict):
         log.error('Missing loggers property in source definition.')
         return
-    if not 'metrics' in loggers:
+    if 'metrics' not in loggers:
         log.error('Metrics logger is not activated.')
         return
     logger = loggers.get('metrics')
     if not ('db_connection' in logger and 'models' in logger):
-        raise ConfigurationError('logger "metrics" configuration has to contain "db_connection" and "models" properties.')
+        raise ConfigurationError(
+             'logger "metrics" configuration has to contain "db_connection" and "models" properties.')
 
     # Create sqlalchemy engine for configured connection and load module containing models
     engine = create_engine(logger.get('db_connection'), echo=True)

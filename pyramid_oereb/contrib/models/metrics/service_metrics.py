@@ -4,7 +4,6 @@ This is the bucket table used to store http access logs behaviors
 """
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy_utils import JSONType
 from sqlalchemy import CheckConstraint
 
 from pyramid_oereb.standard.models import NAMING_CONVENTION
@@ -22,7 +21,7 @@ class HttpLogs(Base):
 
     Attributes:
         id (int): The identifier (primary key), only used for ensuring integrity of the contents
-        service_type (str): the service type used. Possible values: [GetEGRID, GetExtractById, 
+        service_type (str): the service type used. Possible values: [GetEGRID, GetExtractById,
             GetCapabilities, GetVersions]
         format (str): the requested format. Possible values: [xml, json, pdf]
         location_requested (str): the requested location
@@ -34,14 +33,14 @@ class HttpLogs(Base):
     __tablename__ = 'http_logs'
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     date = sa.Column(sa.DateTime, nullable=False)
-    service_type = sa.Column(sa.String, 
-                             CheckConstraint("in ('GetEGRID','GetExtractById','GetCapabilities', 'GetVersion's)"), 
+    service_type = sa.Column(sa.String,
+                             CheckConstraint(
+                                  "in ('GetEGRID','GetExtractById','GetCapabilities', 'GetVersion')"
+                             ),
                              nullable=True)
-    format = sa.Column(sa.String, 
+    format = sa.Column(sa.String,
                        CheckConstraint("in ('xml','json','pdf')"),
                        nullable=True)
     location_requested = sa.Column(sa.String, nullable=True)
     http_status = sa.Column(sa.Integer, nullable=False)
-    flavour = sa.Column(sa.String, nullable=True1)
-
-
+    flavour = sa.Column(sa.String, nullable=True)

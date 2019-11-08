@@ -1045,7 +1045,7 @@ pyramid_oereb:
         running_modifications: runningModifications
 
 # pyramid_oerev_server_logic
-# this section is used to monitor the pyramid_oereb server and will 
+# this section is used to monitor the pyramid_oereb server and will
 # create logs in a dedicated table/database.
 pyramid_oereb_server_logic:
   loggers:
@@ -1053,4 +1053,3 @@ pyramid_oereb_server_logic:
       models: pyramid_oereb.contrib.models.metrics.service_metrics
       db_connection: &service_db_connection
         ${service_logger_sqlalchemy_url}
-
