@@ -20,6 +20,11 @@ from timeit import default_timer as timer
 log = logging.getLogger(__name__)
 
 
+
+def not_found(request):
+    return Response('Not Found', status='404 Not Found')
+
+
 class PlrWebservice(object):
     """
     This class provides the PLR webservice methods.
