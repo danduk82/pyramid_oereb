@@ -19,6 +19,7 @@ def _serialize_response(response):
     x = {}
     x['status']=response.status
     x['headers']=dict(response.headers)
+    x['extras']= response.extras if hasattr(response,'extras') else None
     return {'response': x}
 
 def _serialize_request(request):
@@ -31,18 +32,27 @@ def _serialize_request(request):
     return {'request': x}
 
 
-class OerebStats(object):
-    stats={}
-    def __init__(self,
+class OerebStats(dict):
+    def __init__(self, 
                  service=None,
                  output_format=None,
                  location=None,
                  flavour=None):
-           self.stats['service']=service
-           self.stats['output_format']=output_format
-           self.stats['location']=location
-           self.stats['flavour']=flavour
-
-    def __repr__(self):
-         json.dumps(self.stats)
-
+        super(OerebStats,self).__init__(service=service,
+                                        output_format=output_format,
+                                        location=location,
+                                        flavour=flavour)
+        self.itemlist = super(OerebStats,self).keys()
+    def __setitem__(self, key, value):
+         # TODO: what should happen to the order if
+         #       the key is already in the dict       
+        self.itemlist.append(key)
+        super(OerebStats,self).__setitem__(key, value)
+    def __iter__(self):
+        return iter(self.itemlist)
+    def keys(self):
+        return self.itemlist
+    def values(self):
+        return [self[key] for key in self]  
+    def itervalues(self):
+        return (self[key] for key in self)

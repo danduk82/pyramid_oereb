@@ -17,6 +17,8 @@ from pyreproj import Reprojector
 from pyramid_oereb.lib.readers.address import AddressReader
 from timeit import default_timer as timer
 
+from pyramid_oereb.contrib.stats.decorators import OerebStats
+
 log = logging.getLogger(__name__)
 
 
@@ -86,6 +88,7 @@ class PlrWebservice(object):
         response = render_to_response(renderer_name, versions, request=self._request)
         if self._is_json():
             response.content_type = 'application/json; charset=UTF-8'
+        response.extras = OerebStats(service='GetVersions', output_format=renderer_name)
         return response
 
     def get_capabilities(self):
@@ -130,6 +133,7 @@ class PlrWebservice(object):
         response = render_to_response(renderer_name, capabilities, request=self._request)
         if self._is_json():
             response.content_type = 'application/json; charset=UTF-8'
+        response.extras = OerebStats(service='GetCapabilities', output_format=renderer_name)
         return response
 
     def get_egrid_coord(self):
@@ -250,6 +254,7 @@ class PlrWebservice(object):
                 raise HTTPBadRequest("The format '{}' is wrong".format(params.format))
             end_time = timer()
             log.debug("DONE with extract, time spent: {} seconds".format(end_time - start_time))
+            response.extras = OerebStats(service='GetExtractById', output_format=params.format)
             return response
         else:
             return HTTPNoContent("No real estate found")
@@ -401,6 +406,7 @@ class PlrWebservice(object):
         response = render_to_response(renderer_name, egrid, request=self._request)
         if self._is_json():
             response.content_type = 'application/json; charset=UTF-8'
+        response.extras=OerebStats(service='GetEGRID', output_format=renderer_name, location=egrid)
         return response
 
     def __parse_xy__(self, xy, buffer_dist=None):
