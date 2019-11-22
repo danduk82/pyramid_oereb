@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from pyramid_oereb import route_prefix
 from pyramid_oereb.views.webservice import PlrWebservice, Symbol, Logo, Municipality, Sld
+from pyramid_oereb.contrib.stats.decorators import log_response
 
 
 def includeme(config):  # pragma: no cover
@@ -14,23 +15,23 @@ def includeme(config):  # pragma: no cover
     # Service for logo images
     config.add_route('{0}/image/logo'.format(route_prefix), '/image/logo/{logo}/{language}.{extension}')
     config.add_view(Logo, attr='get_image', route_name='{0}/image/logo'.format(route_prefix),
-                    request_method='GET')
+                    request_method='GET', decorator=log_response)
 
     # Service for municipality images
     config.add_route('{0}/image/municipality'.format(route_prefix), '/image/municipality/{fosnr}.{extension}')
     config.add_view(Municipality, attr='get_image', route_name='{0}/image/municipality'.format(route_prefix),
-                    request_method='GET')
+                    request_method='GET', decorator=log_response)
 
     # Service for symbol images
     config.add_route('{0}/image/symbol'.format(route_prefix),
                      '/image/symbol/{theme_code}/{view_service_id}/{type_code}.{extension}')
     config.add_view(Symbol, attr='get_image', route_name='{0}/image/symbol'.format(route_prefix),
-                    request_method='GET')
+                    request_method='GET', decorator=log_response)
 
     # Service for sld creation on egrid input
     config.add_route('{0}/sld'.format(route_prefix), '/sld')
     config.add_view(Sld, attr='get_sld', route_name='{0}/sld'.format(route_prefix),
-                    request_method='GET')
+                    request_method='GET', decorator=log_response)
 
     # Get versions
     config.add_route('{0}/versions/'.format(route_prefix), '/versions/{format}')
@@ -38,7 +39,8 @@ def includeme(config):  # pragma: no cover
         PlrWebservice,
         attr='get_versions',
         route_name='{0}/versions/'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
 
     # Get version - Can be removed if backward compatibility no longer required.
@@ -47,21 +49,24 @@ def includeme(config):  # pragma: no cover
         PlrWebservice,
         attr='get_versions',
         route_name='{0}/versions.json'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
     config.add_route('{0}/versions'.format(route_prefix), '/versions')
     config.add_view(
         PlrWebservice,
         attr='get_versions',
         route_name='{0}/versions'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
     config.add_route('{0}/versions_old/'.format(route_prefix), '/versions/')
     config.add_view(
         PlrWebservice,
         attr='get_versions',
         route_name='{0}/versions_old/'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
 
     # Get capabilities
@@ -70,7 +75,8 @@ def includeme(config):  # pragma: no cover
         PlrWebservice,
         attr='get_capabilities',
         route_name='{0}/capabilities/'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
 
     # Get capabilities - Can be removed if backward compatibility no longer required.
@@ -79,21 +85,24 @@ def includeme(config):  # pragma: no cover
         PlrWebservice,
         attr='get_capabilities',
         route_name='{0}/capabilities.json'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
     config.add_route('{0}/capabilities'.format(route_prefix), '/capabilities')
     config.add_view(
         PlrWebservice,
         attr='get_capabilities',
         route_name='{0}/capabilities'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
     config.add_route('{0}/capabilities_old'.format(route_prefix), '/capabilities/')
     config.add_view(
         PlrWebservice,
         attr='get_capabilities',
         route_name='{0}/capabilities_old'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
 
     # Get egrid
@@ -105,19 +114,22 @@ def includeme(config):  # pragma: no cover
         PlrWebservice,
         attr='get_egrid_coord',
         route_name='{0}/getegrid_coord/'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
     config.add_view(
         PlrWebservice,
         attr='get_egrid_ident',
         route_name='{0}/getegrid_ident/'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
     config.add_view(
         PlrWebservice,
         attr='get_egrid_address',
         route_name='{0}/getegrid_address/'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
 
     # Get egrid - Can be removed if backward compatibility no longer required.
@@ -129,19 +141,22 @@ def includeme(config):  # pragma: no cover
         PlrWebservice,
         attr='get_egrid_coord',
         route_name='{0}/getegrid_coord.json'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
     config.add_view(
         PlrWebservice,
         attr='get_egrid_ident',
         route_name='{0}/getegrid_ident.json'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
     config.add_view(
         PlrWebservice,
         attr='get_egrid_address',
         route_name='{0}/getegrid_address.json'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
     config.add_route('{0}/getegrid_coord'.format(route_prefix), '/getegrid')
     config.add_route('{0}/getegrid_ident'.format(route_prefix), '/getegrid/{identdn}/{number}')
@@ -153,13 +168,15 @@ def includeme(config):  # pragma: no cover
         PlrWebservice,
         attr='get_egrid_coord',
         route_name='{0}/getegrid_coord'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
     config.add_view(
         PlrWebservice,
         attr='get_egrid_ident',
         route_name='{0}/getegrid_ident'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
 
     config.add_route('{0}/getegrid_coord_old/'.format(route_prefix), '/getegrid/')
@@ -167,7 +184,8 @@ def includeme(config):  # pragma: no cover
         PlrWebservice,
         attr='get_egrid_coord',
         route_name='{0}/getegrid_coord_old/'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
 
     # Get extract by id
@@ -181,19 +199,22 @@ def includeme(config):  # pragma: no cover
         PlrWebservice,
         attr='get_extract_by_id',
         route_name='{0}/extract_1'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
     config.add_view(
         PlrWebservice,
         attr='get_extract_by_id',
         route_name='{0}/extract_2'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
     config.add_view(
         PlrWebservice,
         attr='get_extract_by_id',
         route_name='{0}/extract_3'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
     config.add_route('{0}/extract_1/'.format(route_prefix),
                      '/extract/{flavour}/{format}/{param1}/')
@@ -205,19 +226,22 @@ def includeme(config):  # pragma: no cover
         PlrWebservice,
         attr='get_extract_by_id',
         route_name='{0}/extract_1/'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
     config.add_view(
         PlrWebservice,
         attr='get_extract_by_id',
         route_name='{0}/extract_2/'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
     config.add_view(
         PlrWebservice,
         attr='get_extract_by_id',
         route_name='{0}/extract_3/'.format(route_prefix),
-        request_method='GET'
+        request_method='GET',
+        decorator=log_response
     )
 
     # Commit config
