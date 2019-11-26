@@ -22,9 +22,9 @@ from pyramid_oereb.contrib.stats.decorators import OerebStats
 log = logging.getLogger(__name__)
 
 
-
-def not_found(request):
-    return Response('Not Found', status='404 Not Found')
+#
+#def not_found(request):
+#    return Response('Not Found', status='404 Not Found')
 
 
 class PlrWebservice(object):
@@ -155,7 +155,7 @@ class PlrWebservice(object):
             records = self._real_estate_reader.read(**{'geometry': geom_wkt})
             return self.__get_egrid_response__(records)
         else:
-            raise HTTPBadRequest('XY or GNSS must be defined.')
+            return HTTPBadRequest('XY or GNSS must be defined.')
 
     def get_egrid_ident(self):
         """
@@ -173,7 +173,7 @@ class PlrWebservice(object):
             })
             return self.__get_egrid_response__(records)
         else:
-            raise HTTPBadRequest('IDENTDN and NUMBER must be defined.')
+            return HTTPBadRequest('IDENTDN and NUMBER must be defined.')
 
     def get_egrid_address(self):
         """
@@ -197,7 +197,7 @@ class PlrWebservice(object):
             records = self._real_estate_reader.read(**{'geometry': geometry})
             return self.__get_egrid_response__(records)
         else:
-            raise HTTPBadRequest('POSTALCODE, LOCALISATION and NUMBER must be defined.')
+            return HTTPBadRequest('POSTALCODE, LOCALISATION and NUMBER must be defined.')
 
     def get_extract_by_id(self):
         """
@@ -220,7 +220,7 @@ class PlrWebservice(object):
                 number=params.number
             )
         else:
-            raise HTTPBadRequest("Missing required argument")
+            return HTTPBadRequest("Missing required argument")
 
         # check if result is strictly one (we queried with primary keys)
         if len(real_estate_records) == 1:

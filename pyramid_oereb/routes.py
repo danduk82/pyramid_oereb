@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from pyramid_oereb import route_prefix
-from pyramid_oereb.views.webservice import PlrWebservice, Symbol, Logo, Municipality, Sld, not_found
+from pyramid_oereb.views.webservice import PlrWebservice, Symbol, Logo, Municipality, Sld #, not_found
 from pyramid_oereb.contrib.stats.decorators import log_response
 
 
@@ -245,7 +245,7 @@ def includeme(config):  # pragma: no cover
         decorator=log_response
     )
 
-    config.add_notfound_view(not_found, decorator = log_response)
+#    config.add_notfound_view(not_found, decorator = log_response)
     
     # Commit config
     config.commit()
