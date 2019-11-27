@@ -22,8 +22,6 @@ from pyramid_oereb.contrib.stats.decorators import OerebStats
 log = logging.getLogger(__name__)
 
 
-
-
 class PlrWebservice(object):
     """
     This class provides the PLR webservice methods.
@@ -644,18 +642,6 @@ class Parameter(object):
                         self.__class__.__name__,
                         self.flavour, self.format, self.with_geometry, self.images, self.identdn,
                         self.number, self.egrid, self.language, self.topics)
-    def _asdict(self):
-        log.debug('samerererererere')
-        return {'flavour':self.flavour,
-                'format':self.format,
-                'with_geometry':self.with_geometry,
-                'images':self.images,
-                'identdn':self.identdn,
-                'number':self.number,
-                'egrid':self.egrid,
-                'language':self.language,
-                'topics':self.topics}
-
 
 
 class Logo(object):
