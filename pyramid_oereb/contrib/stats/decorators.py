@@ -36,12 +36,10 @@ class OerebStats(dict):
     def __init__(self, 
                  service=None,
                  output_format=None,
-                 location=None,
-                 flavour=None):
+                 params=None):
         super(OerebStats,self).__init__(service=service,
                                         output_format=output_format,
-                                        location=location,
-                                        flavour=flavour)
+                                        params=params)
         self.itemlist = super(OerebStats,self).keys()
     def __setitem__(self, key, value):
          # TODO: what should happen to the order if

@@ -88,7 +88,7 @@ class PlrWebservice(object):
         response = render_to_response(renderer_name, versions, request=self._request)
         if self._is_json():
             response.content_type = 'application/json; charset=UTF-8'
-        response.extras = OerebStats(service='GetVersions', output_format=renderer_name)
+        response.extras = OerebStats(service='GetVersions', output_format=output_format)
         return response
 
     def get_capabilities(self):
@@ -125,15 +125,15 @@ class PlrWebservice(object):
         # Try - catch for backward compatibility with old specification.
         try:
             output_format = self.__validate_format_param__(['xml', 'json'])
-            renderer_name = 'json' if output_format == 'json' else 'pyramid_oereb_capabilities_xml'
         except HTTPBadRequest:
-            renderer_name = 'json' if self._is_json() else 'pyramid_oereb_capabilities_xml'
+            output_format = None
             log.warn('Deprecated way to specify the format. Use "/capabilities/{format}" instead')
-
+        renderer_name = 'json' if output_format == 'json' or self._is_json() else 'pyramid_oereb_capabilities_xml'
+            
         response = render_to_response(renderer_name, capabilities, request=self._request)
         if self._is_json():
             response.content_type = 'application/json; charset=UTF-8'
-        response.extras = OerebStats(service='GetCapabilities', output_format=renderer_name)
+        response.extras = OerebStats(service='GetCapabilities', output_format=output_format)
         return response
 
     def get_egrid_coord(self):
@@ -145,17 +145,20 @@ class PlrWebservice(object):
         """
         xy = self._params.get('XY')
         gnss = self._params.get('GNSS')
-        if xy or gnss:
-            geom_wkt = 'SRID={0};{1}'
-            if xy:
-                geom_wkt = geom_wkt.format(Config.get('srid'),
-                                           self.__parse_xy__(xy, buffer_dist=1.0).wkt)
-            elif gnss:
-                geom_wkt = geom_wkt.format(Config.get('srid'), self.__parse_gnss__(gnss).wkt)
-            records = self._real_estate_reader.read(**{'geometry': geom_wkt})
-            return self.__get_egrid_response__(records)
-        else:
-            return HTTPBadRequest('XY or GNSS must be defined.')
+        try:
+            if xy or gnss:
+                geom_wkt = 'SRID={0};{1}'
+                if xy:
+                    geom_wkt = geom_wkt.format(Config.get('srid'),
+                                               self.__parse_xy__(xy, buffer_dist=1.0).wkt)
+                elif gnss:
+                    geom_wkt = geom_wkt.format(Config.get('srid'), self.__parse_gnss__(gnss).wkt)
+                records = self._real_estate_reader.read(**{'geometry': geom_wkt})
+                return self.__get_egrid_response__(records)
+            else:
+                return HTTPBadRequest('XY or GNSS must be defined.')
+        except HTTPBadRequest as e:
+            return HTTPBadRequest('{}'.format(e))
 
     def get_egrid_ident(self):
         """
@@ -166,14 +169,17 @@ class PlrWebservice(object):
         """
         identdn = self._request.matchdict.get('identdn')
         number = self._request.matchdict.get('number')
-        if identdn and number:
-            records = self._real_estate_reader.read(**{
-                'nb_ident': identdn,
-                'number': number
-            })
-            return self.__get_egrid_response__(records)
-        else:
-            return HTTPBadRequest('IDENTDN and NUMBER must be defined.')
+        try:
+            if identdn and number:
+                records = self._real_estate_reader.read(**{
+                    'nb_ident': identdn,
+                    'number': number
+                })
+                return self.__get_egrid_response__(records)
+            else:
+                return HTTPBadRequest('IDENTDN and NUMBER must be defined.')
+        except HTTPBadRequest as e:
+            return HTTPBadRequest('{}'.format(e))
 
     def get_egrid_address(self):
         """
@@ -185,19 +191,22 @@ class PlrWebservice(object):
         postalcode = self._request.matchdict.get('postalcode')
         localisation = self._request.matchdict.get('localisation')
         number = self._request.matchdict.get('number')
-        if postalcode and localisation and number:
-            reader = AddressReader(
-                Config.get_address_config().get('source').get('class'),
-                **Config.get_address_config().get('source').get('params')
-            )
-            addresses = reader.read(localisation, int(postalcode), number)
-            if len(addresses) == 0:
-                return HTTPNoContent()
-            geometry = 'SRID={srid};{wkt}'.format(srid=Config.get('srid'), wkt=addresses[0].geom.wkt)
-            records = self._real_estate_reader.read(**{'geometry': geometry})
-            return self.__get_egrid_response__(records)
-        else:
-            return HTTPBadRequest('POSTALCODE, LOCALISATION and NUMBER must be defined.')
+        try:
+            if postalcode and localisation and number:
+                reader = AddressReader(
+                    Config.get_address_config().get('source').get('class'),
+                    **Config.get_address_config().get('source').get('params')
+                )
+                addresses = reader.read(localisation, int(postalcode), number)
+                if len(addresses) == 0:
+                    return HTTPNoContent()
+                geometry = 'SRID={srid};{wkt}'.format(srid=Config.get('srid'), wkt=addresses[0].geom.wkt)
+                records = self._real_estate_reader.read(**{'geometry': geometry})
+                return self.__get_egrid_response__(records)
+            else:
+                return HTTPBadRequest('POSTALCODE, LOCALISATION and NUMBER must be defined.')
+        except HTTPBadRequest as e:
+            return HTTPBadRequest('{}'.format(e))
 
     def get_extract_by_id(self):
         """
@@ -251,10 +260,15 @@ class PlrWebservice(object):
                     request=self._request
                 )
             else:
-                raise HTTPBadRequest("The format '{}' is wrong".format(params.format))
+                return HTTPBadRequest("The format '{}' is wrong".format(params.format))
             end_time = timer()
             log.debug("DONE with extract, time spent: {} seconds".format(end_time - start_time))
-            response.extras = OerebStats(service='GetExtractById', output_format=params.format)
+            try:
+                response.extras = OerebStats(service='GetExtractById',
+                                             output_format=params.format,
+                                             params=vars(params))
+            except AttributeError as e:
+                response.extras = OerebStats(service='GetExtractById',params='{}'.format(e))
             return response
         else:
             return HTTPNoContent("No real estate found")
@@ -406,7 +420,7 @@ class PlrWebservice(object):
         response = render_to_response(renderer_name, egrid, request=self._request)
         if self._is_json():
             response.content_type = 'application/json; charset=UTF-8'
-        response.extras=OerebStats(service='GetEGRID', output_format=renderer_name, location=egrid)
+        response.extras=OerebStats(service='GetEGRID', output_format=output_format)
         return response
 
     def __parse_xy__(self, xy, buffer_dist=None):
@@ -630,6 +644,18 @@ class Parameter(object):
                         self.__class__.__name__,
                         self.flavour, self.format, self.with_geometry, self.images, self.identdn,
                         self.number, self.egrid, self.language, self.topics)
+    def _asdict(self):
+        log.debug('samerererererere')
+        return {'flavour':self.flavour,
+                'format':self.format,
+                'with_geometry':self.with_geometry,
+                'images':self.images,
+                'identdn':self.identdn,
+                'number':self.number,
+                'egrid':self.egrid,
+                'language':self.language,
+                'topics':self.topics}
+
 
 
 class Logo(object):
