@@ -22,9 +22,6 @@ from pyramid_oereb.contrib.stats.decorators import OerebStats
 log = logging.getLogger(__name__)
 
 
-#
-#def not_found(request):
-#    return Response('Not Found', status='404 Not Found')
 
 
 class PlrWebservice(object):
@@ -52,6 +49,9 @@ class PlrWebservice(object):
         """
         url = self._request.current_route_url().split('?')
         return url[0].endswith('.json')
+
+    def not_found(request):
+        return Response('Not Found', status='404 Not Found')
 
     def get_versions(self):
         """
