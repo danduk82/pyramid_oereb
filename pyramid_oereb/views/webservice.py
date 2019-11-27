@@ -215,7 +215,10 @@ class PlrWebservice(object):
         """
         start_time = timer()
         log.debug("get_extract_by_id() start")
-        params = self.__validate_extract_params__()
+        try:
+            params = self.__validate_extract_params__()
+        except HTTPBadRequest as e:
+            return HTTPBadRequest('{}'.format(e))
         processor = self._request.pyramid_oereb_processor
         # read the real estate from configured source by the passed parameters
         real_estate_reader = processor.real_estate_reader
