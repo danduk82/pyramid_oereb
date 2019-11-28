@@ -16,7 +16,6 @@ def log_response(wrapped):
 
 def _serialize_response(response):
     x = {}
-    print(vars(response))
     x['status_code'] = response.status_code
     x['headers'] = dict(response.headers)
     x['extras'] = response.extras if hasattr(response, 'extras') else None
