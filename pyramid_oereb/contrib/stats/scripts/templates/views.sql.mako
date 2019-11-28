@@ -71,6 +71,8 @@ CREATE OR REPLACE VIEW ${schema_name}.stats_get_extract_by_id AS
            cast(msg as json) -> 'response' -> 'extras' ->> 'output_format' AS output_format,
            cast(msg as json) -> 'response' -> 'extras' -> 'params' ->> '__flavour__' AS flavour,
            cast(msg as json) -> 'response' -> 'extras' -> 'params' ->> '__egrid__' AS egrid,
+           cast(msg as json) -> 'response' -> 'extras' -> 'params' ->> '__identdn__' AS identdn,
+           cast(msg as json) -> 'response' -> 'extras' -> 'params' ->> '__number__' AS number,
            created_at,
            cast(msg as json) -> 'request' ->> 'path' AS path                                
     FROM ${schema_name}.${tablename} WHERE logger = 'JSON' AND cast(msg as json) -> 'response' ->'extras' ->> 'service' = 'GetExtractById';
