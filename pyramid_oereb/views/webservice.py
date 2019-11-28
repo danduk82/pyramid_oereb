@@ -78,11 +78,10 @@ class PlrWebservice(object):
         # Try - catch for backward compatibility with old specification.
         try:
             output_format = self.__validate_format_param__(['xml', 'json'])
-            renderer_name = 'json' if output_format == 'json' else 'pyramid_oereb_versions_xml'
         except HTTPBadRequest:
-            renderer_name = 'json' if self._is_json() else 'pyramid_oereb_versions_xml'
+            output_format = None
             log.warn('Deprecated way to specify the format. Use "/versions/{format}" instead')
-
+        renderer_name = 'json' if output_format == 'json' or self._is_json() else 'pyramid_oereb_versions_xml'
         response = render_to_response(renderer_name, versions, request=self._request)
         if self._is_json():
             response.content_type = 'application/json; charset=UTF-8'
@@ -152,11 +151,17 @@ class PlrWebservice(object):
                 elif gnss:
                     geom_wkt = geom_wkt.format(Config.get('srid'), self.__parse_gnss__(gnss).wkt)
                 records = self._real_estate_reader.read(**{'geometry': geom_wkt})
-                return self.__get_egrid_response__(records)
+                response = self.__get_egrid_response__(records)
             else:
-                return HTTPBadRequest('XY or GNSS must be defined.')
+                raise HTTPBadRequest('XY or GNSS must be defined.')
+        except HTTPNoContent as e:
+            response = HTTPNoContent('{}'.format(e))
         except HTTPBadRequest as e:
-            return HTTPBadRequest('{}'.format(e))
+            response = HTTPBadRequest('{}'.format(e))
+        response.extras = OerebStats(service='GetEgridCoord',
+                                     params={'xy':xy,
+                                             'gnss':gnss})
+        return response
 
     def get_egrid_ident(self):
         """
@@ -173,12 +178,18 @@ class PlrWebservice(object):
                     'nb_ident': identdn,
                     'number': number
                 })
-                return self.__get_egrid_response__(records)
+                response = self.__get_egrid_response__(records)
             else:
-                return HTTPBadRequest('IDENTDN and NUMBER must be defined.')
+                raise HTTPBadRequest('IDENTDN and NUMBER must be defined.')
+        except HTTPNoContent as e:
+            response = HTTPNoContent('{}'.format(e))
         except HTTPBadRequest as e:
-            return HTTPBadRequest('{}'.format(e))
-
+            response = HTTPBadRequest('{}'.format(e))
+        response.extras = OerebStats(service='GetEgridIdent',
+                                     params={'identdn':identdn,
+                                             'number':number})
+        return response
+    
     def get_egrid_address(self):
         """
         Returns a list with the matched EGRIDs for the given postal address.
@@ -197,14 +208,21 @@ class PlrWebservice(object):
                 )
                 addresses = reader.read(localisation, int(postalcode), number)
                 if len(addresses) == 0:
-                    return HTTPNoContent()
+                    raise HTTPNoContent()
                 geometry = 'SRID={srid};{wkt}'.format(srid=Config.get('srid'), wkt=addresses[0].geom.wkt)
                 records = self._real_estate_reader.read(**{'geometry': geometry})
-                return self.__get_egrid_response__(records)
+                response = self.__get_egrid_response__(records)
             else:
-                return HTTPBadRequest('POSTALCODE, LOCALISATION and NUMBER must be defined.')
+                raise HTTPBadRequest('POSTALCODE, LOCALISATION and NUMBER must be defined.')
+        except HTTPNoContent as e:
+            response = HTTPNoContent('{}'.format(e))
         except HTTPBadRequest as e:
-            return HTTPBadRequest('{}'.format(e))
+            response = HTTPBadRequest('{}'.format(e))
+        response.extras = OerebStats(service='GetEgridAddress',
+                                     params={'postalcode':postalcode,
+                                             'localisation':localisation,
+                                             'number':number})
+        return response
 
     def get_extract_by_id(self):
         """
@@ -213,15 +231,10 @@ class PlrWebservice(object):
         Returns:
             pyramid.response.Response: The `extract` response.
         """
-        valid_request = True
         start_time = timer()
         log.debug("get_extract_by_id() start")
         try:
             params = self.__validate_extract_params__()
-        except HTTPBadRequest as e:
-            valid_request = False
-            response = HTTPBadRequest('{}'.format(e))
-        try:
             processor = self._request.pyramid_oereb_processor
             # read the real estate from configured source by the passed parameters
             real_estate_reader = processor.real_estate_reader
@@ -233,12 +246,7 @@ class PlrWebservice(object):
                     number=params.number
                 )
             else:
-                valid_request = False
-                response = HTTPBadRequest("Missing required argument")
-        except UnboundLocalError:
-            # params are not set, just go to the return at the end
-            pass
-        if valid_request:
+                raise HTTPBadRequest("Missing required argument")
             # check if result is strictly one (we queried with primary keys)
             if len(real_estate_records) == 1:
                 extract = processor.process(
@@ -268,11 +276,15 @@ class PlrWebservice(object):
                         request=self._request
                     )
                 else:
-                    response = HTTPBadRequest("The format '{}' is wrong".format(params.format))
+                    raise HTTPBadRequest("The format '{}' is wrong".format(params.format))
                 end_time = timer()
                 log.debug("DONE with extract, time spent: {} seconds".format(end_time - start_time))
             else:
-                response = HTTPNoContent("No real estate found")
+                raise HTTPNoContent("No real estate found")
+        except HTTPNoContent as e:
+            response = HTTPNoContent('{}'.format(e))
+        except HTTPBadRequest as e:
+            response = HTTPBadRequest('{}'.format(e))
         try:
             response.extras = OerebStats(service='GetExtractById',
                                          output_format=params.format,
@@ -359,7 +371,6 @@ class PlrWebservice(object):
         topics = self._params.get('TOPICS')
         if topics:
             params.set_topics(topics.split(','))
-
         return params
 
     def __validate_format_param__(self, accepted_formats):
