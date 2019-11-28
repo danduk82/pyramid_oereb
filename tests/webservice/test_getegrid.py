@@ -148,7 +148,7 @@ def test_getegrid_address_missing_parameter():
     webservice = PlrWebservice(MockRequest())
     response = webservice.get_egrid_address()
     assert response.code == 400
-    
+
 
 def test_get_egrid_response():
     with pyramid_oereb_test_config():
