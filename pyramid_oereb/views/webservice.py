@@ -213,66 +213,76 @@ class PlrWebservice(object):
         Returns:
             pyramid.response.Response: The `extract` response.
         """
+        valid_request = True
         start_time = timer()
         log.debug("get_extract_by_id() start")
         try:
             params = self.__validate_extract_params__()
         except HTTPBadRequest as e:
-            return HTTPBadRequest('{}'.format(e))
-        processor = self._request.pyramid_oereb_processor
-        # read the real estate from configured source by the passed parameters
-        real_estate_reader = processor.real_estate_reader
-        if params.egrid:
-            real_estate_records = real_estate_reader.read(egrid=params.egrid)
-        elif params.identdn and params.number:
-            real_estate_records = real_estate_reader.read(
-                nb_ident=params.identdn,
-                number=params.number
-            )
-        else:
-            return HTTPBadRequest("Missing required argument")
-
-        # check if result is strictly one (we queried with primary keys)
-        if len(real_estate_records) == 1:
-            extract = processor.process(
-                real_estate_records[0],
-                params,
-                self._request.route_url('{0}/sld'.format(route_prefix))
-            )
-            if params.format == 'json':
-                log.debug("get_extract_by_id() calling json")
-                response = render_to_response(
-                    'pyramid_oereb_extract_json',
-                    (extract, params),
-                    request=self._request
-                )
-            elif params.format == 'xml':
-                log.debug("get_extract_by_id() calling xml")
-                response = render_to_response(
-                    'pyramid_oereb_extract_xml',
-                    (extract, params),
-                    request=self._request
-                )
-            elif params.format == 'pdf':
-                log.debug("get_extract_by_id() calling pdf")
-                response = render_to_response(
-                    'pyramid_oereb_extract_print',
-                    (extract, params),
-                    request=self._request
+            valid_request = False
+            response = HTTPBadRequest('{}'.format(e))
+        try:
+            processor = self._request.pyramid_oereb_processor
+            # read the real estate from configured source by the passed parameters
+            real_estate_reader = processor.real_estate_reader
+            if params.egrid:
+                real_estate_records = real_estate_reader.read(egrid=params.egrid)
+            elif params.identdn and params.number:
+                real_estate_records = real_estate_reader.read(
+                    nb_ident=params.identdn,
+                    number=params.number
                 )
             else:
-                return HTTPBadRequest("The format '{}' is wrong".format(params.format))
-            end_time = timer()
-            log.debug("DONE with extract, time spent: {} seconds".format(end_time - start_time))
-            try:
-                response.extras = OerebStats(service='GetExtractById',
-                                             output_format=params.format,
-                                             params=vars(params))
-            except AttributeError as e:
-                response.extras = OerebStats(service='GetExtractById',params='{}'.format(e))
-            return response
-        else:
-            return HTTPNoContent("No real estate found")
+                valid_request = False
+                response = HTTPBadRequest("Missing required argument")
+        except UnboundLocalError:
+            # params are not set, just go to the return at the end
+            pass
+        if valid_request:
+            # check if result is strictly one (we queried with primary keys)
+            if len(real_estate_records) == 1:
+                extract = processor.process(
+                    real_estate_records[0],
+                    params,
+                    self._request.route_url('{0}/sld'.format(route_prefix))
+                )
+                if params.format == 'json':
+                    log.debug("get_extract_by_id() calling json")
+                    response = render_to_response(
+                        'pyramid_oereb_extract_json',
+                        (extract, params),
+                        request=self._request
+                    )
+                elif params.format == 'xml':
+                    log.debug("get_extract_by_id() calling xml")
+                    response = render_to_response(
+                        'pyramid_oereb_extract_xml',
+                        (extract, params),
+                        request=self._request
+                    )
+                elif params.format == 'pdf':
+                    log.debug("get_extract_by_id() calling pdf")
+                    response = render_to_response(
+                        'pyramid_oereb_extract_print',
+                        (extract, params),
+                        request=self._request
+                    )
+                else:
+                    response = HTTPBadRequest("The format '{}' is wrong".format(params.format))
+                end_time = timer()
+                log.debug("DONE with extract, time spent: {} seconds".format(end_time - start_time))
+            else:
+                response = HTTPNoContent("No real estate found")
+        try:
+            response.extras = OerebStats(service='GetExtractById',
+                                         output_format=params.format,
+                                         params=vars(params))
+        except Exception as e:
+            # if params is not set we get UnboundLocalError
+            # or we could get ValueError
+            # in any case, the logging should never crash the response deliver
+            response.extras = OerebStats(service='GetExtractById',params='{}'.format(e))
+        return response
 
     def __validate_extract_params__(self):
         """
