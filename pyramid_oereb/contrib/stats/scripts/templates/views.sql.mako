@@ -90,6 +90,6 @@ CREATE OR REPLACE VIEW ${schema_name}.stats_daily_extract_by_id AS
         COUNT(1) FILTER (WHERE flavour = 'full') AS flavour_full,
         COUNT(1) FILTER (WHERE flavour = 'embeddable') AS flavour_embeddable,
         COUNT(1) FILTER (WHERE flavour = 'reduced') AS flavour_reduced
-    FROM ${schema_name}.stats_get_extract_by_id
+    FROM ${schema_name}.stats_get_extract_by_id WHERE cast(status_code as INTEGER) = 200
     GROUP BY 1;
 

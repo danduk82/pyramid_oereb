@@ -253,10 +253,5 @@ def includeme(config):  # pragma: no cover
         decorator=log_response
     )
 
-    config.add_notfound_view(
-        PlrWebservice,
-        attr='not_found',
-        decorator=log_response)
-
     # Commit config
     config.commit()

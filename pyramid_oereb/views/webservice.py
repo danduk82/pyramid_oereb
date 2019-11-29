@@ -48,9 +48,6 @@ class PlrWebservice(object):
         url = self._request.current_route_url().split('?')
         return url[0].endswith('.json')
 
-    def not_found(request):
-        return Response('Not Found', status='404 Not Found')
-
     def get_versions(self):
         """
         Returns the available versions of this service.
@@ -289,11 +286,16 @@ class PlrWebservice(object):
             response.extras = OerebStats(service='GetExtractById',
                                          output_format=params.format,
                                          params=vars(params))
-        except Exception as err:
+        except UnboundLocalError:
+            response.extras = OerebStats(service='GetExtractById',params={'error':response.message})
+        except Exception:
             # if params is not set we get UnboundLocalError
             # or we could get ValueError
-            # in any case, the logging should never crash the response deliver
-            response.extras = OerebStats(service='GetExtractById', params='{}'.format(err))
+            # in any case, the logging should never crash the response delivery
+            try:
+                response.extras = OerebStats(service='GetExtractById',params={'error':response.message})
+            except AttributeError:
+                response.extras = OerebStats(service='GetExtractById')
         return response
 
     def __validate_extract_params__(self):
