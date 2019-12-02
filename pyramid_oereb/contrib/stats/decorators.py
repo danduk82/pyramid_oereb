@@ -48,9 +48,6 @@ class OerebStats(dict):
         self.itemlist = super(OerebStats, self).keys()
 
     def __setitem__(self, key, value):
-        # TODO: what should happen to the order if
-        #       the key is already in the dict
-        self.itemlist.append(key)
         super(OerebStats, self).__setitem__(key, value)
 
     def __iter__(self):
