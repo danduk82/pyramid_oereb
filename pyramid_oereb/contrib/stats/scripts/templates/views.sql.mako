@@ -1,11 +1,3 @@
-
-
-/*
- * example request to use the json object in the msg field
- * SELECT cast(msg AS json),created_at AS response FROM ${schema_name}.${tablename} WHERE logger = 'JSON' AND cast( cast(msg AS json) -> 'response' ->> 'status_code' AS INT) = 200;
- */
-
-
 /*GetVersions view*/
 DROP VIEW IF EXISTS ${schema_name}.stats_get_versions;
 CREATE OR REPLACE VIEW ${schema_name}.stats_get_versions AS
