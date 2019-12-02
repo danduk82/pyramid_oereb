@@ -12,7 +12,7 @@ SCRIPT_FOLDER = os.path.dirname(os.path.abspath(__file__))
 def create_stats_tables():
     parser = optparse.OptionParser(
         usage='usage: %prog [options]',
-        description='creates database and views for sqlalchemy_logger'
+        description='creates database and views for sqlalchemylogger'
     )
     parser.add_option(
         '-c', '--config',
@@ -25,8 +25,8 @@ def create_stats_tables():
         '-s', '--section',
         dest='config_section',
         metavar='SECTION_NAME',
-        default='handler_sqlalchemy_logger',
-        help='section in the ini-file. Default = "handler_sqlalchemy_logger"'
+        default='handler_sqlalchemylogger',
+        help='section in the ini-file. Default = "handler_sqlalchemylogger"'
     )
     parser.add_option(
         '-a', '--args',
@@ -44,7 +44,7 @@ def create_stats_tables():
 
 
 def _create_views(config_file,
-                  config_section = 'handler_sqlalchemy_logger',
+                  config_section = 'handler_sqlalchemylogger',
                   config_sql_args = 'args'):
     config = configparser.ConfigParser()
     config.read(config_file)

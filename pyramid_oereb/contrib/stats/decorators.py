@@ -36,7 +36,7 @@ class OerebStats(dict):
     """
     class OerebStats(dict)
     this class is used to provide a serializable object that can be
-    used to provide insight of application logic in the logs.
+    used to provide insight of application usage in the logs.
     """
     def __init__(self,
                  service=None,
