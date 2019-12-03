@@ -38,20 +38,20 @@ def create_stats_tables():
     options, args = parser.parse_args()
     if not options.configfile:
         parser.error('No configfile set')
-    _create_views(config_file = options.configfile,
-                  config_section = options.config_section,
-                  config_sql_args = options.config_sql_args)
+    _create_views(config_file=options.configfile,
+                  config_section=options.config_section,
+                  config_sql_args=options.config_sql_args)
 
 
 def _create_views(config_file,
-                  config_section = 'handler_sqlalchemylogger',
-                  config_sql_args = 'args'):
+                  config_section='handler_sqlalchemylogger',
+                  config_sql_args='args'):
     config = configparser.ConfigParser()
     config.read(config_file)
     schema_name = ast.literal_eval(config[config_section][config_sql_args])[0]['tableargs']['schema']
     tablename = ast.literal_eval(config[config_section][config_sql_args])[0]['tablename']
     fake_handler = SQLAlchemyHandler(ast.literal_eval(config[config_section][config_sql_args])[0])
     fake_handler.create_db()
-    create_view_sql = Template(filename='{}/templates/views.sql.mako'.format(SCRIPT_FOLDER)) 
+    create_view_sql = Template(filename='{}/templates/views.sql.mako'.format(SCRIPT_FOLDER))
     fake_handler.session.execute(create_view_sql.render(schema_name=schema_name, tablename=tablename))
     fake_handler.session.commit()

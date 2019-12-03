@@ -287,13 +287,13 @@ class PlrWebservice(object):
                                          output_format=params.format,
                                          params=vars(params))
         except UnboundLocalError:
-            response.extras = OerebStats(service='GetExtractById',params={'error':response.message})
+            response.extras = OerebStats(service='GetExtractById', params={'error': response.message})
         except Exception:
             # if params is not set we get UnboundLocalError
             # or we could get ValueError
             # in any case, the logging should never crash the response delivery
             try:
-                response.extras = OerebStats(service='GetExtractById',params={'error':response.message})
+                response.extras = OerebStats(service='GetExtractById', params={'error': response.message})
             except AttributeError:
                 response.extras = OerebStats(service='GetExtractById')
         return response
