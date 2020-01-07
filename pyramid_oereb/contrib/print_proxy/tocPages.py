@@ -1,22 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
-
-
-from PIL import ImageFont
-
 import textwrap
-import os
 
 log = logging.getLogger(__name__)
 
 class TocPages():
-    """
-    This class is inspired by this example: 
-    https://gist.github.com/turicas/1455973
-    """
-    FONT_CADASTRA_NORMAL = os.path.dirname(os.path.abspath(__file__)) + '/fonts/Cadastra/Cadastra.ttf'
-    FONT_CADASTRA_BOLD = os.path.dirname(os.path.abspath(__file__)) + '/fonts/Cadastra/CadastraBd.ttf'
-    
     def __init__(self,extract):
         # variables taken from template toc.jrxml
         self.disposable_height = 842 - 70 # A4 size - (footer + header)
@@ -39,31 +27,6 @@ class TocPages():
         self.theme_without_data_item_height=12
         self.extract = extract
         self.total_length = self.compute_total_lenght()
-    
-    def get_text_size(self, font_filename, font_size, text):
-        font = ImageFont.truetype(font_filename, font_size)
-        return font.getsize_multiline(text)
-
-    def write_text_box(self, text, box_width, font_size, font_filename,
-                       place='left'):
-        lines = []
-        line = []
-        words = text.split()
-        for word in words:
-            new_line = ' '.join(line + [word])
-            size = self.get_text_size(font_filename, font_size, new_line)
-            if size[0] <= box_width:
-                line.append(word)
-            else:
-                lines.append(line)
-                line = [word]
-        if line:
-            lines.append(line)
-        log.warning('lines : {}'.format(lines))
-        lines = [' '.join(line) for line in lines if line]
-        lines = '\n'.join(lines)
-        (_, height) = self.get_text_size(font_filename, font_size, lines)
-        return height
     
     def compute_d1(self):
         return self.d1_height
@@ -99,7 +62,7 @@ class TocPages():
     @staticmethod
     def compute_length_of_wrapped_text(text, nb_char, font_size):
         t = textwrap.wrap(text, nb_char)
-        log.warning('text : \n{}'.format('\n'.join(t)))
+        log.debug('text : \n{}'.format('\n'.join(t)))
         return len(t) * font_size
 
     def compute_d6_right(self):
@@ -107,27 +70,17 @@ class TocPages():
         space_above = 4
         space_title_content = 2
         content_min_size = 23
-        title_font_size = 8
-        content_font_size = 6
         total_size = 0
         for i in self.extract['ExclusionOfLiability']:
             total_size += space_above
-            # total_size += self.write_text_box(i['Title'][0]['Text'],
-            #                             self.d6_right_width,
-            #                             title_font_size,
-            #                             self.FONT_CADASTRA_BOLD)
             total_size += self.compute_length_of_wrapped_text(i['Title'][0]['Text'],
                                                               65,
                                                               14)
             total_size += space_title_content
-            # total_size += self.write_text_box(i['Content'][0]['Text'],
-            #                             self.d6_right_width,
-            #                             content_font_size,
-            #                             self.FONT_CADASTRA_NORMAL)
             total_size += self.compute_length_of_wrapped_text(i['Content'][0]['Text'],
                                                           78,
                                                           10)
-        log.warning('total_size : {}'.format(total_size))
+        log.debug('d6 ritght total_size : {}'.format(total_size))
         if total_size > content_min_size:
             return total_size
         else:
@@ -147,7 +100,7 @@ class TocPages():
             self.compute_d4() + \
             self.compute_d5() + \
             self.compute_d6()
-        log.warning('total page length : {}'.format(x))
+        log.debug('TOC total page length : {}'.format(x))
         return x
     
     def getNbPages(self):

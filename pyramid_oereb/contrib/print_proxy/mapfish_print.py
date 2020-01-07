@@ -20,6 +20,9 @@ if sys.version_info.major == 2:
 else:
     from urllib import parse as urlparse
 
+from PyPDF2 import PdfFileReader
+import io
+
 from .tocPages import TocPages
 
 log = logging.getLogger(__name__)
@@ -81,7 +84,10 @@ class Renderer(JsonRenderer):
         feature_geometry = mapping(extract_record.real_estate.limit)
         pdf_to_join = set()
         
-        extract_as_dict['nbTocPages'] = TocPages(extract_as_dict).getNbPages()
+        if Config.get('print',{}).get('compute_toc_pages', False):
+            extract_as_dict['nbTocPages'] = TocPages(extract_as_dict).getNbPages()
+        else:
+            extract_as_dict['nbTocPages'] = 1
         
         self.convert_to_printable_extract(extract_as_dict, feature_geometry, pdf_to_join)
 
@@ -105,7 +111,6 @@ class Renderer(JsonRenderer):
             'lang': self._language,
             'attributes': extract_as_dict,
         }
-        log.debug(json.dumps(extract_as_dict))
         
         response = self.get_response(system)
 
@@ -118,6 +123,23 @@ class Renderer(JsonRenderer):
             headers=Config.get('print', {})['headers'],
             data=json.dumps(spec)
         )
+        if Config.get('print',{}).get('compute_toc_pages', False):
+            with io.BytesIO() as pdf:
+                pdf.write(print_result.content)
+                pdf_reader = PdfFileReader(pdf)
+                x = []
+                for i in range(len(pdf_reader.getOutlines())) :
+                    x.append(pdf_reader.getOutlines()[i]['/Page']['/StructParents'])
+                true_nb_of_toc = min(x)-1
+                
+                if true_nb_of_toc != extract_as_dict['nbTocPages']:
+                    log.warning('nbTocPages in result pdf: {} are not equal to the one guessed : {}, request new pdf'.format(true_nb_of_toc,extract_as_dict['nbTocPages']))
+                    extract_as_dict['nbTocPages'] = true_nb_of_toc
+                    print_result = requests.post(
+                        urlparse.urljoin(Config.get('print', {})['base_url'] + '/', 'buildreport.pdf'),
+                        headers=Config.get('print', {})['headers'],
+                        data=json.dumps(spec)
+                    )                
 
         if not extract_as_dict['isReduced'] and print_result.status_code == 200:
             main = tempfile.NamedTemporaryFile(suffix='.pdf')
