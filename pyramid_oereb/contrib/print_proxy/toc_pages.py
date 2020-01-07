@@ -58,8 +58,25 @@ class TocPages():
             return self.d5_height
 
     def compute_d6_left(self):
-        # FIXME: compute this one
-        return 10
+        content_min_size = 10 + 10 + 5 + 10 + 10  # spacing between paragraphs
+        total_size = 39
+        paragraph_space = 11
+        for i in self.extract['GeneralInformation']:
+            total_size += paragraph_space
+            total_size += self.compute_length_of_wrapped_text(i['Text'],
+                                                              78,
+                                                              10)
+        total_size += 5
+        for i in self.extract['BaseData']:
+            total_size += paragraph_space
+            total_size += self.compute_length_of_wrapped_text(i['Text'],
+                                                              78,
+                                                              10)
+        log.debug('d6 left total_size : {}'.format(total_size))
+        if total_size > content_min_size:
+            return total_size
+        else:
+            return content_min_size
 
     @staticmethod
     def compute_length_of_wrapped_text(text, nb_char, font_size):

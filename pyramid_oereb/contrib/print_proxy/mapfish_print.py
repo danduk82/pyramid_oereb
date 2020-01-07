@@ -19,7 +19,7 @@ from pyramid_oereb.lib.url import parse_url
 
 from PyPDF2 import PdfFileReader
 
-from .tocPages import TocPages
+from .toc_pages import TocPages
 
 if sys.version_info.major == 2:
     import urlparse
